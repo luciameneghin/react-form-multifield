@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from "@fortawesome/free-regular-svg-icons";
-import { image } from "fontawesome";
 
 const articles = [
   {
@@ -40,7 +39,7 @@ function App() {
     image: '',
     content: '',
     category: '',
-    tags: '',
+    tags: [],
     published: false
   }
 
@@ -61,11 +60,46 @@ function App() {
   const handlerChange = (e) => {
     e.preventDefault();
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    })
+
+    //checkbox tag
+    if (type === 'checkbox' && name === 'tags') {
+      setFormData({
+        ...formData,
+        tags: checked
+          ? [...formData.tags, value]
+          : formData.tags.filter(tag => tag !== value)
+      });
+    }
+
+    // } else if (name === 'tags') {
+    //   setFormData({
+    //     ...formData,
+    //     [name]: value.split(',').map(tag => tag.trim())
+    //   });
+    // } else {
+    //   setFormData({
+    //     ...formData,
+    //     [name]: value
+    //   });
+
+
+
+    //checkbox draft/published
+
+    if (type === 'checkbox' && name === 'published') {
+      setFormData({
+        ...formData,
+        [name]: checked
+      })
+    }
+    else {
+      setFormData({
+        ...formData,
+        [name]: value
+      })
+    }
   }
+
 
 
   const handlerRemoveArticle = (id) => {
@@ -127,39 +161,39 @@ function App() {
               placeholder="category"
               onChange={handlerChange}
             >
-              {/* {articles.map(art => {
-              <option key={art.id} value={art.articlesList}>{art.category}</option> */}
               <option value="">Seleziona una categoria</option>
-              <option value="Animali">Animali</option>
-              <option value="Cucina">Cucina</option>
-              <option value="Eventi">Eventi</option>
-              )
+              <option value="Fai da te">Fai da te</option>
+              <option value="animali">Animali</option>
+              <option value="cucina">Cucina</option>
+              <option value="eventi">Eventi</option>
+              <option value="tecnologia">Tecnologia</option>
+
             </select>
           </div>
 
+
+          {/* tags */}
           <div className="form-group d-flex my-3 text-white my-2">
             <h5 className="col-3">Aggiungi dei tags</h5>
-            <input
-              type="text"
-              name='tags'
-              className="form-control"
-              value={formData.tags}
-              placeholder="Es. tag1, tag2"
-              onChange={handlerChange}
-            />
+            <ul>
+              {["gatto", "mercato", "Firenze", "panino", "Bologna"].map(tag => (
+                <li key={tag} className='form-check'>
+                  <input
+                    type='checkbox'
+                    name='tags'
+                    value={tag}
+                    checked={formData.tags.includes(tag)}
+                    onChange={handlerChange}
+                    className='form-check-input'
+                  />
+                  <label className="text-light ms-2">{tag}</label>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="form-group d-flex my-3 text-white my-2">
             <h5 className="col-3">Pubblicazione</h5>
-            <input
-              type="checkbox"
-              name='published'
-              className="form-check-input me-2"
-              value={formData.published}
-              placeholder="published"
-              onChange={handlerChange}
-            />
-            <label htmlFor="published" className="me-5">Draft</label>
             <input
               type="checkbox"
               name='published'
@@ -187,7 +221,11 @@ function App() {
                 {art.image && <img src={art.image} width='500' className="mx-auto d-block my-3" />}
                 <p>Categoria: {art.category}</p>
                 <p>Contenuto dell'articolo:<br />{art.content}</p>
-                <p>Tags: {art.tags}</p>
+                <p>Tags: {Array.isArray(art.tags) ? art.tags.join(', ') : ''}</p>
+
+                {/* <span className={`badge ${art.published} ? 'bg-info' : 'bg-danger'} text-light`}>
+                  {art.published ? 'Published' : 'Draft'}
+                </span> */}
               </div>
               <div>
                 <i
@@ -200,7 +238,7 @@ function App() {
           ))}
         </ul>
       </section>
-    </div>
+    </div >
   );
 }
 
