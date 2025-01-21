@@ -32,6 +32,26 @@ const articles = [
   }
 ];
 
+const categories = [
+  'Fai da te',
+  'Animali',
+  'Cucina',
+  'Eventi',
+  'Tecnologia'
+]
+
+const tagsObj = [
+  { id: 1, item: "Gatto" },
+  { id: 2, item: "Mercato" },
+  { id: 3, item: "Firenze" },
+  { id: 4, item: "Panino" },
+  { id: 5, item: "Bologna" },
+  { id: 6, item: "Gondoliere" },
+  { id: 7, item: "Venezia" },
+  { id: 8, item: "Carnevale" },
+  { id: 9, item: "Orso polare" }
+];
+
 
 function App() {
   const defaultFormData = {
@@ -42,6 +62,8 @@ function App() {
     tags: [],
     published: false
   }
+
+
 
   const [formData, setFormData] = useState(defaultFormData)
   const [articlesList, setArticlesList] = useState(articles);
@@ -61,45 +83,43 @@ function App() {
     e.preventDefault();
     const { name, value, type, checked } = e.target;
 
-    //checkbox tag
-    if (type === 'checkbox' && name === 'tags') {
-      setFormData({
-        ...formData,
-        tags: checked
-          ? [...formData.tags, value]
-          : formData.tags.filter(tag => tag !== value)
-      });
-    }
 
-    // } else if (name === 'tags') {
-    //   setFormData({
-    //     ...formData,
-    //     [name]: value.split(',').map(tag => tag.trim())
-    //   });
-    // } else {
-    //   setFormData({
-    //     ...formData,
-    //     [name]: value
-    //   });
-
-
-
-    //checkbox draft/published
-
-    if (type === 'checkbox' && name === 'published') {
-      setFormData({
-        ...formData,
-        [name]: checked
-      })
-    }
-    else {
+    if (type === 'text' || type === 'textarea') {
       setFormData({
         ...formData,
         [name]: value
       })
     }
-  }
 
+    //prendo l'index della select che mi interessa
+    // if (name === 'category') {
+    //   [value] = categories[name]
+    // }
+    if (name === 'category') {
+      setFormData({
+        ...formData,
+        category: value
+      })
+    }
+
+    //checkbox tag
+    if (type === 'checkbox' && name === 'tags') {
+      setFormData({
+        ...formData,
+        tags: checked
+          ? [...formData.tags, value]  //aggiungo
+          : formData.tags.filter(tag => tag !== value)  //rimuovo
+      });
+    }
+
+    //checkbox draft/published
+    if (type === 'checkbox' && name === 'published') {
+      setFormData({
+        ...formData,
+        published: checked //valore booleano in automatico
+      })
+    }
+  }
 
 
   const handlerRemoveArticle = (id) => {
@@ -153,21 +173,17 @@ function App() {
           </div>
 
           <div className="form-group d-flex my-3 text-white my-2">
-            <h5 className="text-white col-3">Scrivi le categorie in cui rientra l'articolo</h5>
+            <h5 className="text-white col-3">Seleziona la categoria in cui rientra l'articolo</h5>
             <select
               name='category'
               className="form-select"
               value={formData.category}
-              placeholder="category"
               onChange={handlerChange}
             >
               <option value="">Seleziona una categoria</option>
-              <option value="Fai da te">Fai da te</option>
-              <option value="animali">Animali</option>
-              <option value="cucina">Cucina</option>
-              <option value="eventi">Eventi</option>
-              <option value="tecnologia">Tecnologia</option>
-
+              {categories.map((category, index) => (
+                <option key={index} value={category}>{category}</option>
+              ))}
             </select>
           </div>
 
@@ -176,22 +192,23 @@ function App() {
           <div className="form-group d-flex my-3 text-white my-2">
             <h5 className="col-3">Aggiungi dei tags</h5>
             <ul>
-              {["gatto", "mercato", "Firenze", "panino", "Bologna"].map(tag => (
-                <li key={tag} className='form-check'>
+              {tagsObj.map(tag => (
+                <li key={tag.id} className='form-check'>
                   <input
                     type='checkbox'
                     name='tags'
-                    value={tag}
-                    checked={formData.tags.includes(tag)}
+                    value={tag.item}
+                    checked={formData.tags.includes(tag.item)}
                     onChange={handlerChange}
                     className='form-check-input'
                   />
-                  <label className="text-light ms-2">{tag}</label>
+                  <label className="text-light">{tag.item}</label>
                 </li>
               ))}
             </ul>
           </div>
 
+          {/*pubblicazione */}
           <div className="form-group d-flex my-3 text-white my-2">
             <h5 className="col-3">Pubblicazione</h5>
             <input
@@ -202,9 +219,10 @@ function App() {
               placeholder="published"
               onChange={handlerChange}
             />
-            <label htmlFor="published">Published</label>
+            <span htmlFor="published">Published</span>
           </div>
 
+          {/* bottone */}
           <div className="text-center py-3">
             <button type="submit" className="btn btn-info text-white col-3 justify-content-center">Aggiungi</button>
           </div>
@@ -216,28 +234,27 @@ function App() {
             <li
               key={art.id}
               className="list-group-item d-flex justify-content-between align-items-center">
-              <div className="my-3">
+              <div className="my-3 mx-3">
                 <h5>{art.title}</h5>
-                {art.image && <img src={art.image} width='500' className="mx-auto d-block my-3" />}
+                <span className={`badge ${art.published ? 'bg-info' : 'bg-warning'} text-light`}>
+                  {art.published ? 'Published' : 'Draft'}
+                </span>
+                {art.image && <img src={art.image} width='250' className="mx-auto d-block my-3" />}
                 <p>Categoria: {art.category}</p>
                 <p>Contenuto dell'articolo:<br />{art.content}</p>
                 <p>Tags: {Array.isArray(art.tags) ? art.tags.join(', ') : ''}</p>
 
-                {/* <span className={`badge ${art.published} ? 'bg-info' : 'bg-danger'} text-light`}>
-                  {art.published ? 'Published' : 'Draft'}
-                </span> */}
               </div>
               <div>
-                <i
-                  className="mx-3"
+                <i className="mx-3 fs-3"
                   onClick={() => handlerRemoveArticle(art.id)}>
-                  <FontAwesomeIcon icon={faTrashAlt} color="grey" />
+                  <FontAwesomeIcon icon={faTrashAlt} color="red" />
                 </i>
               </div>
             </li>
           ))}
         </ul>
-      </section>
+      </section >
     </div >
   );
 }
